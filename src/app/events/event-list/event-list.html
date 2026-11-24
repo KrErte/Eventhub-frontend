@@ -1,0 +1,30 @@
+<h1>Sündmused</h1>
+
+@if (events.isLoading()) {
+  <p role="status">Laadin sündmusi…</p>
+} @else if (events.error()) {
+  <p role="alert" class="error">Sündmuste laadimine ebaõnnestus. Proovi hiljem uuesti.</p>
+} @else {
+  @let list = events.value();
+  @if (list.length === 0) {
+    <p>Sündmusi pole.</p>
+  } @else {
+    <ul class="event-list">
+      @for (event of list; track event.id) {
+        <li class="event-card">
+          <h2>{{ event.title }}</h2>
+          <p class="meta">
+            <time [attr.datetime]="event.startsAt">{{
+              event.startsAt | date: 'd. MMMM y, HH:mm'
+            }}</time>
+            · {{ event.venue }}
+          </p>
+          @if (event.description) {
+            <p>{{ event.description }}</p>
+          }
+          <p class="capacity">Kohti: {{ event.capacity }}</p>
+        </li>
+      }
+    </ul>
+  }
+}

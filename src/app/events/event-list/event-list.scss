@@ -1,0 +1,36 @@
+:host {
+  display: block;
+}
+
+.event-list {
+  display: grid;
+  gap: 1rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.event-card {
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+
+  h2 {
+    margin: 0 0 0.25rem;
+    font-size: 1.25rem;
+  }
+
+  p {
+    margin: 0.25rem 0;
+  }
+}
+
+.meta,
+.capacity {
+  color: var(--text-muted);
+}
+
+.error {
+  color: var(--error);
+}
