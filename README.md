@@ -4,7 +4,7 @@ EventHub on sündmuste haldamise rakendus: sündmuste nimekiri, hiljem ka sündm
 See repo sisaldab **frontendi** (Angular). REST API on eraldi repos:
 [eventhub-api](https://github.com/KrErte/eventhub-api).
 
-**Praegune seis:** sündmuste nimekirja leht (`/events`) koos laadimise, vea ja tühja olekuga.
+**Praegune seis:** sündmuste nimekiri (`/events`) ja sündmuse lisamise vorm (`/events/new`).
 Sündmuse loomine, detailvaade, broneerimine ja sisselogimine on veel tegemata.
 
 ## Sisukord
@@ -79,9 +79,11 @@ src/
     ├── app.routes.ts          juurmarsruudid (lazy loading)
     ├── app.ts / .html / .scss rakenduse raam: skip link, päis, <main>, <router-outlet>
     └── events/                sündmuste feature
-        ├── event.model.ts     EventSummary tüüp (= backendi EventResponse)
+        ├── event.model.ts     API tüübid: EventSummary, CreateEventRequest, ProblemDetail
+        ├── event.service.ts   muutvad päringud (POST /api/events)
         ├── events.routes.ts   feature'i marsruudid
-        └── event-list/        sündmuste nimekirja komponent + test
+        ├── event-list/        sündmuste nimekirja komponent + test
+        └── event-create/      sündmuse lisamise vorm (Signal Forms) + test
 ```
 
 Uus feature (nt `bookings/`) saab oma kausta, oma `*.routes.ts` faili ja lisatakse `app.routes.ts`'i
@@ -89,11 +91,12 @@ Uus feature (nt `bookings/`) saab oma kausta, oma `*.routes.ts` faili ja lisatak
 
 ## Marsruudid
 
-| URL       | mis                              | laadimine                                                                 |
-| --------- | -------------------------------- | ------------------------------------------------------------------------- |
-| `/`       | suunab `/events`                 |                                                                           |
-| `/events` | sündmuste nimekiri (`EventList`) | lazy: `events.routes.ts` + komponent laaditakse alles esimesel külastusel |
-| muu       | suunab `/events`                 |                                                                           |
+| URL           | mis                               | laadimine                                                                 |
+| ------------- | --------------------------------- | ------------------------------------------------------------------------- |
+| `/`           | suunab `/events`                  |                                                                           |
+| `/events`     | sündmuste nimekiri (`EventList`)  | lazy: `events.routes.ts` + komponent laaditakse alles esimesel külastusel |
+| `/events/new` | sündmuse lisamine (`EventCreate`) | lazy                                                                      |
+| muu           | suunab `/events`                  |                                                                           |
 
 Lehe pealkiri (`<title>`) tuleb marsruudi `title` väljast, nt „Sündmused · EventHub“.
 
@@ -112,7 +115,24 @@ EventList komponent
 
 - **Lugemine** käib `httpResource()`'ga: see teeb päringu automaatselt, hoiab tulemust signalis ja
   annab laadimise ning vea oleku. Käsitsi `subscribe`'i ega olekumuutujaid pole vaja.
-- **Muutmine** (loomine, broneerimine) tuleb teenusesse, mis kasutab `HttpClient`'it.
+- **Muutmine** käib teenuse kaudu: `EventService.create()` teeb `HttpClient`'iga `POST /api/events`.
+
+### Sündmuse lisamise vorm
+
+`EventCreate` kasutab **Signal Forms**'i (`form()`, `[formField]`, `submit()`):
+
+1. Mudel on signal (`EventDraft`). Väljade reeglid (`required`, `maxLength`, `min`, `max`, „algusaeg
+   tulevikus“) on samad mis backendis ja teated on eesti keeles.
+2. Viga näidatakse välja all alles siis, kui väli on puudutatud või vormi üritati salvestada.
+3. `submit()` käivitab salvestamise ainult kehtiva vormi korral. Vigase vormi puhul liigub fookus
+   esimesele vigasele väljale.
+4. Backendi `400` vastuse `errors` (`väli → teade`) seotakse õigete väljadega. Muu viga näitab
+   üldist teadet „Salvestamine ebaõnnestus. Proovi uuesti.“ (`role="alert"`).
+5. Õnnestumisel suunatakse tagasi `/events`, kus nimekiri laaditakse uuesti.
+
+`datetime-local` väli annab aja kasutaja kohalikus ajas („2027-05-01T18:00“). See teisendatakse
+enne saatmist UTC-ks (`toISOString()`).
+
 - **Tüübid:** `EventSummary` (`events/event.model.ts`) peegeldab backendi `EventResponse`'i.
   Backendi välja muutmisel tuleb see tüüp samuti uuendada.
 - Aeg tuleb API-st UTC ISO stringina (`2027-01-30T09:00:00Z`) ja kuvatakse `DatePipe`'iga kasutaja
@@ -166,10 +186,11 @@ Komponendi testid kasutavad `provideHttpClientTesting()`'ut ja `HttpTestingContr
 backendi pole vaja, iga test annab ise vastuse (andmed, tühi nimekiri, 500 viga) ja kontrollib
 renderdatud HTML-i.
 
-| test                                   | mida kontrollib                                                                            |
-| -------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `app.spec.ts`                          | päis, skip link ja `<main id="main">` on olemas                                            |
-| `events/event-list/event-list.spec.ts` | laadimise teade, nimekiri ja andmed, tühi olek, vea olek, „Proovi uuesti“ teeb uue päringu |
+| test                                       | mida kontrollib                                                                                                 |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| `app.spec.ts`                              | päis, skip link ja `<main id="main">` on olemas                                                                 |
+| `events/event-list/event-list.spec.ts`     | laadimise teade, nimekiri ja andmed, „Lisa sündmus“ link, tühi olek, vea olek, „Proovi uuesti“ teeb uue päringu |
+| `events/event-create/event-create.spec.ts` | sildid, kliendipoolsed vead + fookus, mineviku aeg, edukas POST + suunamine, serveri väljavead, üldine viga     |
 
 ## Konventsioonid
 

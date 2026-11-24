@@ -1,0 +1,80 @@
+:host {
+  display: block;
+}
+
+h1 {
+  margin-bottom: 0.25rem;
+}
+
+.hint {
+  margin: 0 0 1.5rem;
+  color: var(--text-muted);
+}
+
+form {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 32rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.375rem;
+}
+
+label {
+  font-weight: 600;
+}
+
+input,
+textarea {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--text-muted);
+  border-radius: 0.375rem;
+
+  &[aria-invalid='true'] {
+    border-color: var(--error);
+    border-width: 2px;
+  }
+}
+
+textarea {
+  resize: vertical;
+}
+
+.field-error,
+.form-error {
+  margin: 0;
+  color: var(--error);
+}
+
+.form-error {
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.primary {
+  padding: 0.5rem 1.25rem;
+  font: inherit;
+  font-weight: 600;
+  color: var(--on-accent);
+  background: var(--accent);
+  border: 0;
+  border-radius: 0.375rem;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: progress;
+    opacity: 0.75;
+  }
+}

@@ -1,0 +1,87 @@
+<h1>Lisa sündmus</h1>
+<p class="hint">Tärniga (<span aria-hidden="true">*</span>) märgitud väljad on kohustuslikud.</p>
+
+@if (formError(); as message) {
+  <p role="alert" class="form-error">{{ message }}</p>
+}
+
+<form novalidate (submit)="save($event)">
+  <div class="field">
+    <label for="title">Pealkiri <span aria-hidden="true">*</span></label>
+    <input
+      id="title"
+      type="text"
+      autocomplete="off"
+      [formField]="eventForm.title"
+      [attr.aria-invalid]="errorFor(eventForm.title) ? true : null"
+      [attr.aria-describedby]="errorFor(eventForm.title) ? 'title-error' : null"
+    />
+    @if (errorFor(eventForm.title); as message) {
+      <p id="title-error" class="field-error">{{ message }}</p>
+    }
+  </div>
+
+  <div class="field">
+    <label for="description">Kirjeldus</label>
+    <textarea
+      id="description"
+      rows="4"
+      [formField]="eventForm.description"
+      [attr.aria-invalid]="errorFor(eventForm.description) ? true : null"
+      [attr.aria-describedby]="errorFor(eventForm.description) ? 'description-error' : null"
+    ></textarea>
+    @if (errorFor(eventForm.description); as message) {
+      <p id="description-error" class="field-error">{{ message }}</p>
+    }
+  </div>
+
+  <div class="field">
+    <label for="startsAt">Algusaeg <span aria-hidden="true">*</span></label>
+    <input
+      id="startsAt"
+      type="datetime-local"
+      [formField]="eventForm.startsAt"
+      [attr.aria-invalid]="errorFor(eventForm.startsAt) ? true : null"
+      [attr.aria-describedby]="errorFor(eventForm.startsAt) ? 'startsAt-error' : null"
+    />
+    @if (errorFor(eventForm.startsAt); as message) {
+      <p id="startsAt-error" class="field-error">{{ message }}</p>
+    }
+  </div>
+
+  <div class="field">
+    <label for="venue">Toimumiskoht <span aria-hidden="true">*</span></label>
+    <input
+      id="venue"
+      type="text"
+      [formField]="eventForm.venue"
+      [attr.aria-invalid]="errorFor(eventForm.venue) ? true : null"
+      [attr.aria-describedby]="errorFor(eventForm.venue) ? 'venue-error' : null"
+    />
+    @if (errorFor(eventForm.venue); as message) {
+      <p id="venue-error" class="field-error">{{ message }}</p>
+    }
+  </div>
+
+  <div class="field">
+    <label for="capacity">Kohtade arv <span aria-hidden="true">*</span></label>
+    <input
+      id="capacity"
+      type="number"
+      inputmode="numeric"
+      [formField]="eventForm.capacity"
+      [attr.aria-invalid]="errorFor(eventForm.capacity) ? true : null"
+      [attr.aria-describedby]="errorFor(eventForm.capacity) ? 'capacity-error' : null"
+    />
+    @if (errorFor(eventForm.capacity); as message) {
+      <p id="capacity-error" class="field-error">{{ message }}</p>
+    }
+  </div>
+
+  <div class="actions">
+    <button type="submit" class="primary" [disabled]="eventForm().submitting()">
+      {{ eventForm().submitting() ? 'Salvestan…' : 'Salvesta' }}
+    </button>
+    <a routerLink="/events">Tühista</a>
+  </div>
+</form>

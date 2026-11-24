@@ -1,6 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { EventSummary } from '../event.model';
 import { EventList } from './event-list';
 
@@ -10,7 +11,7 @@ describe('EventList', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [EventList],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
     });
     httpMock = TestBed.inject(HttpTestingController);
   });
@@ -64,6 +65,14 @@ describe('EventList', () => {
     expect(items[0].textContent).toContain('1500');
     expect(items[0].querySelector('time')?.getAttribute('datetime')).toBe('2027-01-30T09:00:00Z');
     expect(items[1].textContent).toContain('Angulari õhtu');
+  });
+
+  it('links to the create page', async () => {
+    const el = await render((url) => httpMock.expectOne(url).flush([]));
+
+    const link = el.querySelector<HTMLAnchorElement>('a.add-link');
+    expect(link?.textContent).toContain('Lisa sündmus');
+    expect(link?.getAttribute('href')).toBe('/events/new');
   });
 
   it('shows an empty state when there are no events', async () => {
