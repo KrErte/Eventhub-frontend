@@ -82,4 +82,32 @@ describe('EventList', () => {
       'Sündmuste laadimine ebaõnnestus',
     );
   });
+
+  it('retries loading when the retry button is clicked', async () => {
+    const fixture = TestBed.createComponent(EventList);
+    TestBed.tick();
+    httpMock.expectOne('/api/events').flush(null, { status: 503, statusText: 'Unavailable' });
+    await fixture.whenStable();
+
+    const el = fixture.nativeElement as HTMLElement;
+    const retry = el.querySelector<HTMLButtonElement>('button.retry');
+    expect(retry?.textContent).toContain('Proovi uuesti');
+
+    retry!.click();
+    TestBed.tick();
+    httpMock.expectOne('/api/events').flush([
+      {
+        id: '1',
+        title: 'Frontend meetup',
+        description: null,
+        startsAt: '2027-02-11T16:00:00Z',
+        venue: 'Tehnopol, Tallinn',
+        capacity: 80,
+      },
+    ]);
+    await fixture.whenStable();
+
+    expect(el.querySelector('[role="alert"]')).toBeNull();
+    expect(el.querySelectorAll('li')).toHaveLength(1);
+  });
 });

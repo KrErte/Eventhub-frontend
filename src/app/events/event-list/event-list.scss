@@ -31,6 +31,25 @@
   color: var(--text-muted);
 }
 
+.error-box {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+}
+
 .error {
+  margin: 0;
   color: var(--error);
+}
+
+.retry {
+  padding: 0.5rem 1rem;
+  font: inherit;
+  font-weight: 600;
+  color: var(--on-accent);
+  background: var(--accent);
+  border: 0;
+  border-radius: 0.375rem;
+  cursor: pointer;
 }

@@ -3,7 +3,10 @@
 @if (events.isLoading()) {
   <p role="status">Laadin sündmusi…</p>
 } @else if (events.error()) {
-  <p role="alert" class="error">Sündmuste laadimine ebaõnnestus. Proovi hiljem uuesti.</p>
+  <div class="error-box">
+    <p role="alert" class="error">Sündmuste laadimine ebaõnnestus.</p>
+    <button type="button" class="retry" (click)="events.reload()">Proovi uuesti</button>
+  </div>
 } @else {
   @let list = events.value();
   @if (list.length === 0) {
