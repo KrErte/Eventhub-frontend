@@ -21,6 +21,21 @@ describe('App', () => {
     expect(el.querySelector('main#main')).not.toBeNull();
   });
 
+  it('links to the events list and the development log', async () => {
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    const el = fixture.nativeElement as HTMLElement;
+
+    const links = Array.from(el.querySelectorAll('nav a')).map((a) => [
+      a.textContent?.trim(),
+      a.getAttribute('href'),
+    ]);
+    expect(links).toEqual([
+      ['Sündmused', '/events'],
+      ['Arenduse käik', '/arendus'],
+    ]);
+  });
+
   it('has no accessibility violations', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();

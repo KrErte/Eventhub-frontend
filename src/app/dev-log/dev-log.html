@@ -1,0 +1,53 @@
+<h1>Arenduse käik</h1>
+<p class="intro">
+  Mis on EventHubis siiani tehtud, etapp etapi haaval. Iga etapi juures on lingid commitidele
+  GitHubis.
+</p>
+
+<ol class="stages">
+  @for (stage of stages; track stage.title; let i = $index) {
+    <li class="stage">
+      <h2>
+        <span class="step" aria-hidden="true">{{ i + 1 }}</span>
+        {{ stage.title }}
+      </h2>
+      <p class="summary">{{ stage.summary }}</p>
+      <ul class="points">
+        @for (point of stage.points; track point) {
+          <li>{{ point }}</li>
+        }
+      </ul>
+      <h3 class="commits-heading">Commitid</h3>
+      <ul class="commits">
+        @for (commit of stage.commits; track commit.hash) {
+          <li>
+            <span class="repo">{{ commit.repo }}</span>
+            <a [href]="commitUrl(commit)" target="_blank" rel="noopener">
+              <code>{{ commit.hash }}</code>
+              {{ commit.message }}
+              <span class="visually-hidden">(avaneb uues aknas)</span>
+            </a>
+          </li>
+        }
+      </ul>
+    </li>
+  }
+</ol>
+
+<section class="status" aria-labelledby="state-heading">
+  <h2 id="state-heading">Seis praegu</h2>
+  <ul>
+    @for (item of currentState; track item) {
+      <li>{{ item }}</li>
+    }
+  </ul>
+</section>
+
+<section class="status" aria-labelledby="next-heading">
+  <h2 id="next-heading">Järgmised sammud</h2>
+  <ul>
+    @for (item of nextSteps; track item) {
+      <li>{{ item }}</li>
+    }
+  </ul>
+</section>

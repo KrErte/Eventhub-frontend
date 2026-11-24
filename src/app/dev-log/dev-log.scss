@@ -1,0 +1,116 @@
+:host {
+  display: block;
+}
+
+h1 {
+  margin-bottom: 0.25rem;
+}
+
+.intro {
+  margin: 0 0 1.5rem;
+  color: var(--text-muted);
+}
+
+.stages {
+  display: grid;
+  gap: 1rem;
+  padding: 0;
+  margin: 0 0 1.5rem;
+  list-style: none;
+}
+
+.stage,
+.status {
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    margin: 0 0 0.25rem;
+    font-size: 1.25rem;
+  }
+}
+
+.status {
+  margin-bottom: 1rem;
+
+  ul {
+    margin: 0.5rem 0 0;
+    padding-left: 1.25rem;
+  }
+}
+
+.step {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.summary {
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+}
+
+.points {
+  margin: 0;
+  padding-left: 1.25rem;
+
+  li + li {
+    margin-top: 0.25rem;
+  }
+}
+
+.commits-heading {
+  margin: 0.875rem 0 0.375rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.commits {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9375rem;
+
+  li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+
+  code {
+    font-size: 0.875rem;
+  }
+}
+
+.repo {
+  flex: none;
+  min-width: 4.75rem;
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
