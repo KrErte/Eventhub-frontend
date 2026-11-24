@@ -11,4 +11,9 @@ export const EVENTS_ROUTES: Routes = [
     title: 'Lisa sündmus · EventHub',
     loadComponent: () => import('./event-create/event-create').then((m) => m.EventCreate),
   },
+  {
+    path: ':id',
+    title: 'Sündmus · EventHub',
+    loadComponent: () => import('./event-detail/event-detail').then((m) => m.EventDetail),
+  },
 ];

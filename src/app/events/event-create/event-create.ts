@@ -1,7 +1,5 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import {
-  FieldTree,
   form,
   FormField,
   max,
@@ -13,7 +11,8 @@ import {
   ValidationError,
 } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
-import { CreateEventRequest, ProblemDetail } from '../event.model';
+import { fieldError, serverFieldErrors } from '../../shared/form-errors';
+import { CreateEventRequest } from '../event.model';
 import { EventService } from '../event.service';
 
 /** Form model. `startsAt` is the raw `datetime-local` value (local time, e.g. "2027-05-01T18:00"). */
@@ -26,10 +25,6 @@ interface EventDraft {
 }
 
 const FIELD_NAMES = ['title', 'description', 'startsAt', 'venue', 'capacity'] as const;
-type FieldName = (typeof FIELD_NAMES)[number];
-
-const isFieldName = (name: string): name is FieldName =>
-  (FIELD_NAMES as readonly string[]).includes(name);
 
 @Component({
   selector: 'app-event-create',
@@ -74,14 +69,7 @@ export class EventCreate {
   /** Error that does not belong to a single field (e.g. server unavailable). */
   protected readonly formError = signal<string | null>(null);
 
-  /** First error message of a field, shown only after the user has touched it (or tried to submit). */
-  protected errorFor<T>(field: FieldTree<T>): string | null {
-    const state = field();
-    if (!state.touched() || !state.invalid()) {
-      return null;
-    }
-    return state.errors()[0]?.message ?? null;
-  }
+  protected readonly errorFor = fieldError;
 
   protected async save(event: SubmitEvent): Promise<void> {
     event.preventDefault();
@@ -93,33 +81,20 @@ export class EventCreate {
         await this.router.navigate(['/events']);
         return undefined;
       } catch (error) {
-        return this.toSubmitErrors(error, fields);
+        const fieldErrors: ValidationError.WithOptionalFieldTree[] = serverFieldErrors(
+          error,
+          fields,
+          FIELD_NAMES,
+        );
+        if (fieldErrors.length > 0) {
+          return fieldErrors;
+        }
+        this.formError.set('Salvestamine ebaõnnestus. Proovi uuesti.');
+        return undefined;
       }
     });
 
     this.focusFirstInvalidField();
-  }
-
-  /** Maps a failed request to field errors (400 with `errors`) or a general form error. */
-  private toSubmitErrors(
-    error: unknown,
-    fields: FieldTree<EventDraft>,
-  ): ValidationError.WithOptionalFieldTree[] | undefined {
-    if (error instanceof HttpErrorResponse && error.status === 400) {
-      const problem = error.error as ProblemDetail | null;
-      const fieldErrors = Object.entries(problem?.errors ?? {})
-        .filter(([name]) => isFieldName(name))
-        .map(([name, message]) => ({
-          kind: 'server',
-          message,
-          fieldTree: fields[name as FieldName],
-        }));
-      if (fieldErrors.length > 0) {
-        return fieldErrors;
-      }
-    }
-    this.formError.set('Salvestamine ebaõnnestus. Proovi uuesti.');
-    return undefined;
   }
 
   private focusFirstInvalidField(): void {

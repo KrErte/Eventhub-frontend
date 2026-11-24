@@ -18,7 +18,9 @@
     <ul class="event-list">
       @for (event of list; track event.id) {
         <li class="event-card">
-          <h2>{{ event.title }}</h2>
+          <h2>
+            <a [routerLink]="['/events', event.id]">{{ event.title }}</a>
+          </h2>
           <p class="meta">
             <time [attr.datetime]="event.startsAt">{{
               event.startsAt | date: 'd. MMMM y, HH:mm'
@@ -28,7 +30,13 @@
           @if (event.description) {
             <p>{{ event.description }}</p>
           }
-          <p class="capacity">Kohti: {{ event.capacity }}</p>
+          <p class="availability" [class.sold-out]="event.availableSeats === 0">
+            @if (event.availableSeats === 0) {
+              Välja müüdud
+            } @else {
+              {{ event.availableSeats }} / {{ event.capacity }} kohta vaba
+            }
+          </p>
         </li>
       }
     </ul>

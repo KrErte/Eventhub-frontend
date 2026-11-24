@@ -45,6 +45,7 @@ describe('EventList', () => {
       startsAt: '2027-01-30T09:00:00Z',
       venue: 'Raekoja plats, Tartu',
       capacity: 1500,
+      availableSeats: 1500,
     },
     {
       id: '2',
@@ -53,6 +54,7 @@ describe('EventList', () => {
       startsAt: '2027-02-11T16:00:00Z',
       venue: 'Tehnopol, Tallinn',
       capacity: 80,
+      availableSeats: 0,
     },
   ];
 
@@ -92,6 +94,7 @@ describe('EventList', () => {
         startsAt: '2027-01-30T09:00:00Z',
         venue: 'Raekoja plats, Tartu',
         capacity: 1500,
+        availableSeats: 1500,
       },
       {
         id: '2',
@@ -100,6 +103,7 @@ describe('EventList', () => {
         startsAt: '2027-02-11T16:00:00Z',
         venue: 'Tehnopol, Tallinn',
         capacity: 80,
+        availableSeats: 0,
       },
     ];
 
@@ -112,6 +116,11 @@ describe('EventList', () => {
     expect(items[0].textContent).toContain('1500');
     expect(items[0].querySelector('time')?.getAttribute('datetime')).toBe('2027-01-30T09:00:00Z');
     expect(items[1].textContent).toContain('Angulari õhtu');
+    expect(items[0].querySelector('.availability')?.textContent).toContain(
+      '1500 / 1500 kohta vaba',
+    );
+    expect(items[1].querySelector('.availability')?.textContent).toContain('Välja müüdud');
+    expect(items[0].querySelector('h2 a')?.getAttribute('href')).toBe('/events/1');
   });
 
   it('links to the create page', async () => {
@@ -159,6 +168,7 @@ describe('EventList', () => {
         startsAt: '2027-02-11T16:00:00Z',
         venue: 'Tehnopol, Tallinn',
         capacity: 80,
+        availableSeats: 0,
       },
     ]);
     await fixture.whenStable();

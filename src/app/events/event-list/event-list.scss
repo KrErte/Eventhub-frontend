@@ -48,9 +48,27 @@
   }
 }
 
-.meta,
-.capacity {
+.meta {
   color: var(--text-muted);
+}
+
+.event-card h2 a {
+  color: var(--text);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+
+  &:hover {
+    color: var(--accent);
+  }
+}
+
+.availability {
+  color: var(--text-muted);
+
+  &.sold-out {
+    color: var(--error);
+    font-weight: 600;
+  }
 }
 
 .error-box {

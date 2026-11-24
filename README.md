@@ -4,7 +4,7 @@ EventHub on sündmuste haldamise rakendus: sündmuste nimekiri, hiljem ka sündm
 See repo sisaldab **frontendi** (Angular). REST API on eraldi repos:
 [eventhub-api](https://github.com/KrErte/eventhub-api).
 
-**Praegune seis:** sündmuste nimekiri (`/events`) ja sündmuse lisamise vorm (`/events/new`).
+**Praegune seis:** sündmuste nimekiri, sündmuse lisamine, sündmuse leht ja kohtade broneerimine.
 Sündmuse loomine, detailvaade, broneerimine ja sisselogimine on veel tegemata.
 
 ## Sisukord
@@ -83,7 +83,15 @@ src/
         ├── event.service.ts   muutvad päringud (POST /api/events)
         ├── events.routes.ts   feature'i marsruudid
         ├── event-list/        sündmuste nimekirja komponent + test
-        └── event-create/      sündmuse lisamise vorm (Signal Forms) + test
+        ├── event-create/      sündmuse lisamise vorm (Signal Forms) + test
+        └── event-detail/      sündmuse leht + broneerimise vorm + test
+    ├── bookings/              broneeringute feature
+    │   ├── booking.model.ts   CreateBookingRequest, BookingResponse
+    │   ├── booking.service.ts POST /api/events/{id}/bookings
+    │   └── booking-form/      broneerimise vorm (kasutatakse sündmuse lehel) + test
+    └── shared/
+        └── form-errors.ts     vormide ühine loogika: fieldError(), serverFieldErrors(), ProblemDetail
+src/testing/axe.ts             AXE abifunktsioon testidele (rakenduse buildist välja jäetud)
 ```
 
 Uus feature (nt `bookings/`) saab oma kausta, oma `*.routes.ts` faili ja lisatakse `app.routes.ts`'i
@@ -91,12 +99,13 @@ Uus feature (nt `bookings/`) saab oma kausta, oma `*.routes.ts` faili ja lisatak
 
 ## Marsruudid
 
-| URL           | mis                               | laadimine                                                                 |
-| ------------- | --------------------------------- | ------------------------------------------------------------------------- |
-| `/`           | suunab `/events`                  |                                                                           |
-| `/events`     | sündmuste nimekiri (`EventList`)  | lazy: `events.routes.ts` + komponent laaditakse alles esimesel külastusel |
-| `/events/new` | sündmuse lisamine (`EventCreate`) | lazy                                                                      |
-| muu           | suunab `/events`                  |                                                                           |
+| URL           | mis                                          | laadimine                                                                  |
+| ------------- | -------------------------------------------- | -------------------------------------------------------------------------- |
+| `/`           | suunab `/events`                             |                                                                            |
+| `/events`     | sündmuste nimekiri (`EventList`)             | lazy: `events.routes.ts` + komponent laaditakse alles esimesel külastusel  |
+| `/events/new` | sündmuse lisamine (`EventCreate`)            | lazy                                                                       |
+| `/events/:id` | sündmuse leht + broneerimine (`EventDetail`) | lazy. `:id` jõuab komponenti `input()`'ina (`withComponentInputBinding()`) |
+| muu           | suunab `/events`                             |                                                                            |
 
 Lehe pealkiri (`<title>`) tuleb marsruudi `title` väljast, nt „Sündmused · EventHub“.
 
@@ -132,6 +141,23 @@ EventList komponent
 
 `datetime-local` väli annab aja kasutaja kohalikus ajas („2027-05-01T18:00“). See teisendatakse
 enne saatmist UTC-ks (`toISOString()`).
+
+### Broneerimine
+
+`EventDetail` (`/events/:id`) laeb sündmuse `httpResource()`'ga ja näitab:
+
+- „12 / 80 kohta vaba“ või „Välja müüdud“,
+- broneerimise vormi (`BookingForm`) ainult siis, kui kohti on ja sündmus pole alanud,
+- 404 korral „Sündmust ei leitud“, muu vea korral teate koos nupuga „Proovi uuesti“.
+
+`BookingForm` (`bookings/booking-form/`) on Signal Forms vorm: nimi, e-post (`email()` validaator) ja
+kohtade arv 1 kuni min(10, vabad kohad). Maksimum ja selle veateade arvutatakse `availableSeats` sisendist.
+
+- Õnnestumisel tühjendatakse vorm, `booked` output teatab broneeringust ja sündmuse leht näitab
+  kinnitust („Broneering tehtud: 2 kohta …“, `role="status"`) ning laeb vabad kohad uuesti.
+- Backendi `409` vastus, mille `errors` sisaldab `email` välja (sama e-post juba broneerinud),
+  näidatakse e-posti välja juures.
+- Muu `409` (kohad said vahepeal otsa, sündmus alanud) näitab serveri teadet vormi kohal (`role="alert"`).
 
 - **Tüübid:** `EventSummary` (`events/event.model.ts`) peegeldab backendi `EventResponse`'i.
   Backendi välja muutmisel tuleb see tüüp samuti uuendada.
@@ -196,11 +222,13 @@ Komponendi testid kasutavad `provideHttpClientTesting()`'ut ja `HttpTestingContr
 backendi pole vaja, iga test annab ise vastuse (andmed, tühi nimekiri, 500 viga) ja kontrollib
 renderdatud HTML-i.
 
-| test                                       | mida kontrollib                                                                                                                  |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
-| `app.spec.ts`                              | päis, skip link ja `<main id="main">` on olemas                                                                                  |
-| `events/event-list/event-list.spec.ts`     | laadimise teade, nimekiri ja andmed, „Lisa sündmus“ link, tühi olek, vea olek, „Proovi uuesti“ teeb uue päringu, AXE igas olekus |
-| `events/event-create/event-create.spec.ts` | sildid, kliendipoolsed vead + fookus, mineviku aeg, edukas POST + suunamine, serveri väljavead, üldine viga                      |
+| test                                         | mida kontrollib                                                                                                                                     |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app.spec.ts`                                | päis, skip link ja `<main id="main">` on olemas                                                                                                     |
+| `events/event-list/event-list.spec.ts`       | laadimise teade, nimekiri ja andmed, „Lisa sündmus“ link, tühi olek, vea olek, „Proovi uuesti“ teeb uue päringu, AXE igas olekus                    |
+| `events/event-detail/event-detail.spec.ts`   | andmed ja vabad kohad, välja müüdud, toimunud sündmus, 404, „Proovi uuesti“, kinnitus + uuesti laadimine, AXE                                       |
+| `bookings/booking-form/booking-form.spec.ts` | vaikimisi 1 koht, vead + fookus, max vabad kohad, edukas POST + vormi tühjendus, sama e-post (409) välja juures, kohti pole (409), üldine viga, AXE |
+| `events/event-create/event-create.spec.ts`   | sildid, kliendipoolsed vead + fookus, mineviku aeg, edukas POST + suunamine, serveri väljavead, üldine viga                                         |
 
 ## Konventsioonid
 

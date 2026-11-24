@@ -1,0 +1,63 @@
+<section class="booking" aria-labelledby="booking-heading">
+  <h2 id="booking-heading">Broneeri kohti</h2>
+
+  @if (formError(); as message) {
+    <p role="alert" class="form-error">{{ message }}</p>
+  }
+
+  <form novalidate (submit)="save($event)">
+    <div class="field">
+      <label for="booking-name">Nimi <span aria-hidden="true">*</span></label>
+      <input
+        id="booking-name"
+        type="text"
+        autocomplete="name"
+        [formField]="bookingForm.name"
+        [attr.aria-invalid]="errorFor(bookingForm.name) ? true : null"
+        [attr.aria-describedby]="errorFor(bookingForm.name) ? 'booking-name-error' : null"
+      />
+      @if (errorFor(bookingForm.name); as message) {
+        <p id="booking-name-error" class="field-error">{{ message }}</p>
+      }
+    </div>
+
+    <div class="field">
+      <label for="booking-email">E-post <span aria-hidden="true">*</span></label>
+      <input
+        id="booking-email"
+        type="email"
+        autocomplete="email"
+        [formField]="bookingForm.email"
+        [attr.aria-invalid]="errorFor(bookingForm.email) ? true : null"
+        [attr.aria-describedby]="errorFor(bookingForm.email) ? 'booking-email-error' : null"
+      />
+      @if (errorFor(bookingForm.email); as message) {
+        <p id="booking-email-error" class="field-error">{{ message }}</p>
+      }
+    </div>
+
+    <div class="field">
+      <label for="booking-seats">Kohtade arv <span aria-hidden="true">*</span></label>
+      <input
+        id="booking-seats"
+        type="number"
+        inputmode="numeric"
+        [formField]="bookingForm.seats"
+        [attr.aria-invalid]="errorFor(bookingForm.seats) ? true : null"
+        [attr.aria-describedby]="
+          errorFor(bookingForm.seats)
+            ? 'booking-seats-error booking-seats-hint'
+            : 'booking-seats-hint'
+        "
+      />
+      <p id="booking-seats-hint" class="hint">Korraga 1–{{ maxSeats() }}</p>
+      @if (errorFor(bookingForm.seats); as message) {
+        <p id="booking-seats-error" class="field-error">{{ message }}</p>
+      }
+    </div>
+
+    <button type="submit" class="primary" [disabled]="bookingForm().submitting()">
+      {{ bookingForm().submitting() ? 'Broneerin…' : 'Broneeri' }}
+    </button>
+  </form>
+</section>

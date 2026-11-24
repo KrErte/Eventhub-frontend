@@ -1,0 +1,50 @@
+<p class="back">
+  <a routerLink="/events"><span aria-hidden="true">←</span> Kõik sündmused</a>
+</p>
+
+@if (event.hasValue()) {
+  @let e = event.value();
+  <article>
+    <h1>{{ e.title }}</h1>
+    <p class="meta">
+      <time [attr.datetime]="e.startsAt">{{ e.startsAt | date: 'd. MMMM y, HH:mm' }}</time>
+      · {{ e.venue }}
+    </p>
+    @if (e.description) {
+      <p class="description">{{ e.description }}</p>
+    }
+    <p class="availability" [class.sold-out]="e.availableSeats === 0">
+      @if (e.availableSeats === 0) {
+        Välja müüdud
+      } @else {
+        {{ e.availableSeats }} / {{ e.capacity }} kohta vaba
+      }
+    </p>
+  </article>
+
+  <div role="status">
+    @if (confirmation(); as message) {
+      <p class="confirmation">{{ message }}</p>
+    }
+  </div>
+
+  @if (hasStarted(e)) {
+    <p class="notice">Sündmus on juba toimunud, broneerida ei saa.</p>
+  } @else if (e.availableSeats > 0) {
+    <app-booking-form
+      [eventId]="e.id"
+      [availableSeats]="e.availableSeats"
+      (booked)="onBooked($event)"
+    />
+  }
+} @else if (notFound()) {
+  <h1>Sündmust ei leitud</h1>
+  <p>Seda sündmust pole olemas või see on eemaldatud.</p>
+} @else if (event.error()) {
+  <div class="error-box">
+    <p role="alert" class="error">Sündmuse laadimine ebaõnnestus.</p>
+    <button type="button" class="retry" (click)="event.reload()">Proovi uuesti</button>
+  </div>
+} @else {
+  <p role="status">Laadin sündmust…</p>
+}
