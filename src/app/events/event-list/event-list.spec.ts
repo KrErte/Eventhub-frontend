@@ -2,6 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { expectNoAxeViolations } from '../../../testing/axe';
 import { EventSummary } from '../event.model';
 import { EventList } from './event-list';
 
@@ -34,6 +35,52 @@ describe('EventList', () => {
     expect(el.querySelector('[role="status"]')?.textContent).toContain('Laadin');
 
     httpMock.expectOne('/api/events').flush([]);
+  });
+
+  const sampleEvents: EventSummary[] = [
+    {
+      id: '1',
+      title: 'Tartu talvine jooks',
+      description: null,
+      startsAt: '2027-01-30T09:00:00Z',
+      venue: 'Raekoja plats, Tartu',
+      capacity: 1500,
+    },
+    {
+      id: '2',
+      title: 'Frontend meetup',
+      description: 'Angulari õhtu',
+      startsAt: '2027-02-11T16:00:00Z',
+      venue: 'Tehnopol, Tallinn',
+      capacity: 80,
+    },
+  ];
+
+  describe('accessibility', () => {
+    it('has no violations while loading', async () => {
+      const fixture = TestBed.createComponent(EventList);
+      TestBed.tick();
+
+      await expectNoAxeViolations(fixture.nativeElement);
+      httpMock.expectOne('/api/events').flush([]);
+    });
+
+    it('has no violations with events', async () => {
+      const el = await render((url) => httpMock.expectOne(url).flush(sampleEvents));
+      await expectNoAxeViolations(el);
+    });
+
+    it('has no violations when empty', async () => {
+      const el = await render((url) => httpMock.expectOne(url).flush([]));
+      await expectNoAxeViolations(el);
+    });
+
+    it('has no violations in the error state', async () => {
+      const el = await render((url) =>
+        httpMock.expectOne(url).flush(null, { status: 500, statusText: 'Server Error' }),
+      );
+      await expectNoAxeViolations(el);
+    });
   });
 
   it('lists events from the API', async () => {

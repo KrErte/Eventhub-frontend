@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { expectNoAxeViolations } from '../testing/axe';
 import { App } from './app';
 
 describe('App', () => {
@@ -18,5 +19,12 @@ describe('App', () => {
     expect(el.querySelector('.brand')?.textContent).toContain('EventHub');
     expect(el.querySelector('.skip-link')?.getAttribute('href')).toBe('#main');
     expect(el.querySelector('main#main')).not.toBeNull();
+  });
+
+  it('has no accessibility violations', async () => {
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+
+    await expectNoAxeViolations(fixture.nativeElement);
   });
 });

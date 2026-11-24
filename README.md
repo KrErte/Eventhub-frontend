@@ -163,8 +163,18 @@ Eesmärk on **WCAG 2.1 AA** ja AXE kontrollide läbimine.
 - **Dünaamilised teated:** laadimine ja vead on ARIA live-regioonides (`status` / `alert`).
 - **Keel:** `<html lang="et">`, et ekraanilugeja hääldaks teksti eesti keeles.
 
-Automaatne AXE kontroll pole veel testidesse lisatud. Seni saab lehte kontrollida brauseri
-AXE DevTools laiendusega.
+**Automaatne AXE kontroll:** iga vaate ja oleku testis on `expectNoAxeViolations()`
+(`src/testing/axe.ts`, [axe-core](https://github.com/dequelabs/axe-core)). See kontrollib WCAG 2.1 A/AA
+reegleid ja best practice'e (sildid, ARIA, nuppude ja linkide nimed, pealkirjade järjekord, unikaalsed
+id-d jm) ning kukutab testi läbi koos reegli nime ja vigase elemendiga. Uue komponendi või oleku
+lisamisel lisa ka selle kohta AXE test.
+
+Testides on välja lülitatud:
+
+- `color-contrast`: jsdom ei renderda stiile. Kontrastsus on tagatud `styles.scss` värvimuutujatega
+  (kõik tekstipaarid ≥ 6:1 mõlemas teemas) ja seda saab kontrollida brauseris AXE DevTools laiendusega.
+- lehe tasandi reeglid (`region`, `landmark-one-main`, `page-has-heading-one`): komponenditest
+  renderdab ainult lehe osa, mitte tervet lehte.
 
 ## Stiilid ja teemad
 
@@ -186,11 +196,11 @@ Komponendi testid kasutavad `provideHttpClientTesting()`'ut ja `HttpTestingContr
 backendi pole vaja, iga test annab ise vastuse (andmed, tühi nimekiri, 500 viga) ja kontrollib
 renderdatud HTML-i.
 
-| test                                       | mida kontrollib                                                                                                 |
-| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
-| `app.spec.ts`                              | päis, skip link ja `<main id="main">` on olemas                                                                 |
-| `events/event-list/event-list.spec.ts`     | laadimise teade, nimekiri ja andmed, „Lisa sündmus“ link, tühi olek, vea olek, „Proovi uuesti“ teeb uue päringu |
-| `events/event-create/event-create.spec.ts` | sildid, kliendipoolsed vead + fookus, mineviku aeg, edukas POST + suunamine, serveri väljavead, üldine viga     |
+| test                                       | mida kontrollib                                                                                                                  |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| `app.spec.ts`                              | päis, skip link ja `<main id="main">` on olemas                                                                                  |
+| `events/event-list/event-list.spec.ts`     | laadimise teade, nimekiri ja andmed, „Lisa sündmus“ link, tühi olek, vea olek, „Proovi uuesti“ teeb uue päringu, AXE igas olekus |
+| `events/event-create/event-create.spec.ts` | sildid, kliendipoolsed vead + fookus, mineviku aeg, edukas POST + suunamine, serveri väljavead, üldine viga                      |
 
 ## Konventsioonid
 

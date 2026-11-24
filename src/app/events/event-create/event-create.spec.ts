@@ -2,6 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
+import { expectNoAxeViolations } from '../../../testing/axe';
 import { EventCreate } from './event-create';
 
 /** Lets pending promises (submit(), firstValueFrom) settle without waiting on open HTTP requests. */
@@ -49,6 +50,31 @@ describe('EventCreate', () => {
     await settle();
     TestBed.tick();
   }
+
+  describe('accessibility', () => {
+    it('has no violations in the empty form', async () => {
+      await expectNoAxeViolations(el);
+    });
+
+    it('has no violations while showing field errors', async () => {
+      await submitForm();
+      expect(el.querySelector('#title-error')).not.toBeNull();
+
+      await expectNoAxeViolations(el);
+      httpMock.expectNone('/api/events');
+    });
+
+    it('has no violations while showing a general error', async () => {
+      fillValidForm();
+      await submitForm();
+      httpMock.expectOne('/api/events').flush(null, { status: 500, statusText: 'Server Error' });
+      await settle();
+      TestBed.tick();
+      expect(el.querySelector('[role="alert"]')).not.toBeNull();
+
+      await expectNoAxeViolations(el);
+    });
+  });
 
   it('links every input to a label', () => {
     for (const id of ['title', 'description', 'startsAt', 'venue', 'capacity']) {
